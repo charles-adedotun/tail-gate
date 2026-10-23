@@ -1,0 +1,53 @@
+# tail-gate configuration example
+listen_addr = "127.0.0.1:9443"
+tailscale_socket_path = "/var/run/tailscale/tailscaled.sock"
+
+# Static platform landing page & health check
+[[routes]]
+host = "tail.example.com"
+backend = { type = "static", target = { status = 200, body = "ok", content_type = "text/plain" } }
+strip_headers = true
+
+# Application console (TCP backend)
+[[routes]]
+host = "app.tail.example.com"
+backend = { type = "tcp", target = "127.0.0.1:8000" }
+strip_headers = true
+require_tailscale_tags = ["tag:operator", "tag:server"]
+
+# High-performance microservice (Direct Unix Domain Socket backend - zero TCP loopback)
+[[routes]]
+host = "service.tail.example.com"
+backend = { type = "unix", target = "/run/service/edge.sock" }
+strip_headers = true
+
+# Platform Broker (Direct Unix Domain Socket backend)
+[[routes]]
+host = "broker.tail.example.com"
+backend = { type = "unix", target = "/var/run/edge/edge-broker.sock" }
+strip_headers = true
+require_tailscale_tags = ["tag:operator"]
+
+# Collaboration service
+[[routes]]
+host = "presence.tail.example.com"
+backend = { type = "tcp", target = "127.0.0.1:3000" }
+strip_headers = true
+
+# Identity provider
+[[routes]]
+host = "id.tail.example.com"
+backend = { type = "tcp", target = "127.0.0.1:1411" }
+strip_headers = true
+
+# Portal desk
+[[routes]]
+host = "portal.tail.example.com"
+backend = { type = "tcp", target = "127.0.0.1:8080" }
+strip_headers = true
+
+# Analytics desk
+[[routes]]
+host = "analytics.tail.example.com"
+backend = { type = "tcp", target = "127.0.0.1:3001" }
+strip_headers = true
